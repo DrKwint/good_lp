@@ -74,7 +74,7 @@ impl SolverModel for HighsProblem {
 
     fn solve(self) -> Result<Self::Solution, Self::Error> {
         let mut model = self.into_inner();
-        model.set_option("message_level", 0);
+        model.make_quiet();
         let solved = model.solve();
         match solved.status() {
             HighsModelStatus::NotSet => Err(ResolutionError::Other("NotSet")),
@@ -86,11 +86,7 @@ impl SolverModel for HighsProblem {
             HighsModelStatus::ModelEmpty => Err(ResolutionError::Other("ModelEmpty")),
             HighsModelStatus::PrimalInfeasible => Err(ResolutionError::Infeasible),
             HighsModelStatus::PrimalUnbounded => {
-                if model.check_primal_infeasible() {
-                    Err(ResolutionError::Other("UnboundedAndInfeasibleError"))
-                } else {
                     Err(ResolutionError::Unbounded)
-                }
             },
             _ok_status => Ok(HighsSolution {
                 solution: solved.get_solution(),
