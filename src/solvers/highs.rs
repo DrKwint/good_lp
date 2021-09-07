@@ -85,7 +85,13 @@ impl SolverModel for HighsProblem {
             HighsModelStatus::PostsolveError => Err(ResolutionError::Other("PostsolveError")),
             HighsModelStatus::ModelEmpty => Err(ResolutionError::Other("ModelEmpty")),
             HighsModelStatus::PrimalInfeasible => Err(ResolutionError::Infeasible),
-            HighsModelStatus::PrimalUnbounded => Err(ResolutionError::Unbounded),
+            HighsModelStatus::PrimalUnbounded => {
+                if model.check_primal_infeasible() {
+                    Err(ResolutionError::Other("UnboundedAndInfeasibleError"))
+                } else {
+                    Err(ResolutionError::Unbounded)
+                }
+            },
             _ok_status => Ok(HighsSolution {
                 solution: solved.get_solution(),
                 dual_values: vec![],
