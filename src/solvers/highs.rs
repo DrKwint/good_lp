@@ -73,7 +73,8 @@ impl SolverModel for HighsProblem {
     type Error = ResolutionError;
 
     fn solve(self) -> Result<Self::Solution, Self::Error> {
-        let model = self.into_inner();
+        let mut model = self.into_inner();
+        model.set_option("message_level", 0);
         let solved = model.solve();
         match solved.status() {
             HighsModelStatus::NotSet => Err(ResolutionError::Other("NotSet")),
